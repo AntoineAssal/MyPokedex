@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { AppBar, Toolbar, Grid, Card, CardContent, CardMedia, CircularProgress, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import mockData from "../mockData"
-import {toFirstCharUpperCase, padLeadingZeros } from "../constants";
+import React, { useEffect, useState } from "react";
+import { AppBar, Toolbar, Grid, Card, CardContent, CardMedia, CircularProgress, Typography, TextField } from "@material-ui/core";
+import { makeStyles, fade} from "@material-ui/core/styles";
+import SearchIcon from "@material-ui/icons/Search";
+import axios from "axios";
+import { toFirstCharUpperCase, padLeadingZeros } from "../constants";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     pokedexContainer: {
         paddingTop: "20px",
         paddingLeft: "50px",
@@ -23,20 +24,58 @@ const useStyles = makeStyles({
     cardContent: {
         textAlign: "center",
         color: "white"
+    },
+    searchContainer:{
+        display : "flex",
+        backgroundColor: fade(theme.palette.common.white,0.15),
+        paddingTop: "5px",
+        paddingBottom: "5px",
+        paddingLeft: "20px",
+        paddingRight: "20px"
+    },
+    searchIcon: {
+        alignSelf: "flex-end",
+        marginBottom: "5px",
+    },
+    searchInput: {
+        width: "200px",
+        margin: "5px"
+    },
+    logo :{
+        paddingLeft: "150px",
+        
     }
-})
+}));
 
 
 const Pokedex = (props) => {
     const { history } = props;
     const classes = useStyles();
-    const [pokemonData, setPokemonData] = useState(mockData);
+    const [pokemonData, setPokemonData] = useState({});
 
+    useEffect(() => {
+        // Limit 807 because the API doesn't have pics for after that 
+        axios
+            .get(`https://pokeapi.co/api/v2/pokemon?limit=807`)
+            .then(function (response) {
+                const { data } = response;
+                const { results } = data;
+                const newPokemonData = {};
+                // For each instead of map since not returning anything just adding to the new array
+                results.forEach((pokemon, index) => {
+                    newPokemonData[index + 1] = {
+                        id: index + 1,
+                        name: pokemon.name,
+                        sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
+                    };
+                });
+                setPokemonData(newPokemonData);
+            });
+    }, []);
 
     const getPokemonCard = (pokemonId) => {
         console.log(pokemonData[`${pokemonId}`]);
-        const { id, name } = pokemonData[`${pokemonId}`];
-        const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+        const { id, name, sprite } = pokemonData[pokemonId];
         return (
             <Grid item xs={4} key={pokemonId}>
                 <Card className={classes.cardColor} onClick={() => history.push(`/${pokemonId}`)}>
@@ -56,7 +95,20 @@ const Pokedex = (props) => {
     return (
         <>
             <AppBar position="static">
-                <Toolbar />
+                <Toolbar>
+                <div className={classes.searchContainer}>
+                    <SearchIcon className={classes.searchIcon}/>
+                    <TextField 
+                    className={classes.searchInput}
+                    label="My Pokemon"
+                    variant= "standard"
+                     />
+                </div>
+                <div className= {classes.logo}>
+                    <img src="https://i.imgur.com/FHJDx1E.png" alt="error" className= {classes.logo} ></img>
+                </div>
+
+                </Toolbar>
             </AppBar>
             {pokemonData ? (
                 <Grid container spacing={2} className={classes.pokedexContainer}>
