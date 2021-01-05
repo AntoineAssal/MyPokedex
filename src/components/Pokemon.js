@@ -5,6 +5,7 @@ import { CircularProgress, Link, Typography, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toFirstCharUpperCase, padLeadingZeros } from "../constants";
 import axios from "axios";
+import pokemonType from "../typeColors";
 
 
 const Pokemon = (props) => {
@@ -45,15 +46,15 @@ const Pokemon = (props) => {
                 <Typography variant="h3" >Pokemon Description: </Typography>
                 <Typography>
                     {"Species: "}
-                    <Link href={species.url}> {species.name} </Link>
+                    <Link href={species.url}> {toFirstCharUpperCase(species.name)} </Link>
                 </Typography>
-                <Typography> Height: {height} </Typography>
-                <Typography> Weight: {weight} grams </Typography>
-                <Typography> Types: </Typography>
+                <Typography> Height: {height} Decimetres. </Typography>
+                <Typography> Weight: {weight} Grams. </Typography>
+                <Typography> Type(s): </Typography>
                 {types.map((typeInfo) => {
                     const { type } = typeInfo;
                     const { name } = type;
-                    return <Typography key={name}> {`${name}`}</Typography>;
+                    return <Typography key={name} style={{backgroundColor : pokemonType[name]}}> {`${name}`}</Typography>;
                 })}
             </>
         )
@@ -62,7 +63,7 @@ const Pokemon = (props) => {
     //2.pokemon= good data, that means we've gotten the info  --> return the actual info
     //3.pokmeon = bad data or false (if it doesn't exist in the API) --> return pokemon not found
     return (<>
-        {pokemon === undefined && <CircularProgress/>}
+        {pokemon === undefined && <CircularProgress />}
         {pokemon !== undefined && pokemon && pokemonJSXGenerator()}
         {pokemon === false && <Typography> Pokemon not found</Typography>}
         {pokemon !== undefined && (
@@ -70,7 +71,7 @@ const Pokemon = (props) => {
                 Go Back to Pokedex
             </Button>
         )}
-      </>);
+    </>);
 };
 
 export default Pokemon;
