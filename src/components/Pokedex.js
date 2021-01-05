@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { AppBar, Toolbar, Grid, Card, CardContent, CardMedia, CircularProgress, Typography, TextField } from "@material-ui/core";
-import { makeStyles, fade} from "@material-ui/core/styles";
+import { makeStyles, fade } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import axios from "axios";
 import { toFirstCharUpperCase, padLeadingZeros } from "../constants";
+import pokemonType from "../typeColors";
 
 const useStyles = makeStyles(theme => ({
     pokedexContainer: {
@@ -25,9 +26,9 @@ const useStyles = makeStyles(theme => ({
         textAlign: "center",
         color: "white"
     },
-    searchContainer:{
-        display : "flex",
-        backgroundColor: fade(theme.palette.common.white,0.15),
+    searchContainer: {
+        display: "flex",
+        backgroundColor: fade(theme.palette.common.white, 0.15),
         paddingTop: "5px",
         paddingBottom: "5px",
         paddingLeft: "20px",
@@ -39,11 +40,12 @@ const useStyles = makeStyles(theme => ({
     },
     searchInput: {
         width: "200px",
-        margin: "5px"
+        margin: "5px",
+        color: "white"
     },
-    logo :{
+    logo: {
         paddingLeft: "150px",
-        
+
     }
 }));
 
@@ -52,11 +54,16 @@ const Pokedex = (props) => {
     const { history } = props;
     const classes = useStyles();
     const [pokemonData, setPokemonData] = useState({});
+    const [filter, setFilter] = useState("");
+
+    const searchInputChangeHandler = (e) => {
+        setFilter(e.target.value);
+    };
 
     useEffect(() => {
         // Limit 807 because the API doesn't have pics for after that 
         axios
-            .get(`https://pokeapi.co/api/v2/pokemon?limit=807`)
+            .get(`https://pokeapi.co/api/v2/pokemon?limit=386`)
             .then(function (response) {
                 const { data } = response;
                 const { results } = data;
@@ -74,46 +81,51 @@ const Pokedex = (props) => {
     }, []);
 
     const getPokemonCard = (pokemonId) => {
-        console.log(pokemonData[`${pokemonId}`]);
-        const { id, name, sprite } = pokemonData[pokemonId];
+        const { id, name, sprite, types } = pokemonData[pokemonId];
         return (
             <Grid item xs={4} key={pokemonId}>
-                <Card className={classes.cardColor} onClick={() => history.push(`/${pokemonId}`)}>
-                    <CardMedia
-                        className={classes.cardMedia}
-                        image={sprite}
-                        style={{ width: "130px", height: "130px" }}
-                    />
-                    <CardContent className={classes.cardContent}>
-                        <Typography> {`#${padLeadingZeros(id)}. ${toFirstCharUpperCase(name)}`}</Typography>
+                <a href="" style={{ textDecoration: "none" }}>
+                    <Card className={classes.cardColor} onClick={() => history.push(`/${pokemonId}`)}>
+                        <CardMedia
+                            className={classes.cardMedia}
+                            image={sprite}
+                            style={{ width: "130px", height: "130px" }}
+                        />
+                        <CardContent className={classes.cardContent}>
+                            <Typography> {`#${padLeadingZeros(id)}. ${toFirstCharUpperCase(name)}`}</Typography>
+
+                    
                     </CardContent>
-                </Card>
+                    </Card>
+                </a>
             </Grid>
         )
-    }
+    };
 
     return (
         <>
             <AppBar position="static">
                 <Toolbar>
-                <div className={classes.searchContainer}>
-                    <SearchIcon className={classes.searchIcon}/>
-                    <TextField 
-                    className={classes.searchInput}
-                    label="My Pokemon"
-                    variant= "standard"
-                     />
-                </div>
-                <div className= {classes.logo}>
-                    <img src="https://i.imgur.com/FHJDx1E.png" alt="error" className= {classes.logo} ></img>
-                </div>
+                    <div className={classes.searchContainer}>
+                        <SearchIcon className={classes.searchIcon} />
+                        <TextField
+                            onChange={searchInputChangeHandler}
+                            label="My Pokemon"
+                            variant="standard"
+                        />
+                    </div>
+                    <div className={classes.logo}>
+                        <a href="/">
+                            <img src="https://i.imgur.com/FHJDx1E.png" alt="error" className={classes.logo} ></img>
+                        </a>
+                    </div>
 
                 </Toolbar>
             </AppBar>
             {pokemonData ? (
                 <Grid container spacing={2} className={classes.pokedexContainer}>
                     {
-                        Object.keys(pokemonData).map(pokemonId => getPokemonCard(pokemonId))
+                        Object.keys(pokemonData).map((pokemonId) => pokemonData[pokemonId].name.includes(filter) && getPokemonCard(pokemonId))
                     }
                 </Grid>
             ) : (
