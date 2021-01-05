@@ -93,7 +93,11 @@ const Pokedex = (props) => {
                         />
                         <CardContent className={classes.cardContent}>
                             <Typography> {`#${padLeadingZeros(id)}. ${toFirstCharUpperCase(name)}`}</Typography>
-
+                            {types.map((typeInfo) => {
+                    const { type } = typeInfo;
+                    const { name } = type;
+                     <Typography key={name} style={{backgroundColor : pokemonType[name]}}> {`${name}`}</Typography>;
+                })}
                     
                     </CardContent>
                     </Card>
